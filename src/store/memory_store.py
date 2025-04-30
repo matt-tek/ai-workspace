@@ -4,6 +4,8 @@ from typing_extensions import List
 from langchain_core.documents import Document
 from langchain_core.runnables import chain
 
+
+
 vector_store = InMemoryVectorStore(embeddings)
 
 def vectorize_in_memory(all_split) -> list[str]:

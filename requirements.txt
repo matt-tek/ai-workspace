@@ -12,6 +12,7 @@ python-jose
 pypdf
 langchain-text-splitters
 langchain-openai
+langchain[mistralai]
 langchain-core
 langgraph
 langchain-community
