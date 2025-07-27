@@ -5,13 +5,24 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.messages import SystemMessage
 from src.core import Chat, LlmFactory, vector_store
+from ..datasets.data import sample_queries, expected_responses_gpt, expected_responses_mistral
+
 
 load_dotenv()
 
 @tool(response_format="content_and_artifact")
 def retrieve(query: str):
     """Retrieve information related to a query."""
-    retrieved_docs = vector_store.similarity_search(query, k=2)
+    retrieved_docs = vector_store.similarity_search(query, k=1)
+    serialized = "\n\n".join(
+        (f"Source: {doc.metadata}\n" f"Content: {doc.page_content}")
+        for doc in retrieved_docs
+    )
+    return serialized, retrieved_docs
+
+def retrieve_for_testing(query: str):
+    """Retrieve information related to a query."""
+    retrieved_docs = vector_store.similarity_search(query, k=1)
     serialized = "\n\n".join(
         (f"Source: {doc.metadata}\n" f"Content: {doc.page_content}")
         for doc in retrieved_docs
@@ -24,6 +35,7 @@ class Rag():
         self.graph_builder = StateGraph(MessagesState)
         self.config = {"configurable": {"thread_id": "hellototo"}}
         self.memory = MemorySaver()
+        self.test_datasets = []
 
     def _initialize_graph(self):
         tools = ToolNode([retrieve])
@@ -90,3 +102,32 @@ class Rag():
         # Run
         response = self.llm.invoke(prompt)
         return {"messages": [response]}
+
+    def predict(self, input_message: str) -> str:
+        ai_message = ""
+        for idx, step in enumerate(self.graph.stream(
+            {"messages": [{"role": "user", "content": input_message}]},
+            stream_mode="values",
+            config=self.config
+        )):
+           print(f"=========={idx}============\n")
+           print(step["messages"][-1])
+           if (step["messages"][-1].type == 'ai'):
+               ai_message = step["messages"][-1]
+        return ai_message
+    
+    def create_dataset(self):
+        for query,reference in zip(sample_queries,expected_responses_gpt):
+            relevant_docs = retrieve_for_testing(query)
+            print(f'RETRIEVED DOCS : ', end="/n")
+            print(relevant_docs)
+            print(f'RETRIEVED DOCS END: ', end="/n")
+            response = self.predict(query)
+            self.test_datasets.append(
+                {
+                    "user_input":query,
+                    "retrieved_contexts":relevant_docs,
+                    "response":response.content,
+                    "reference":reference
+                }
+            )

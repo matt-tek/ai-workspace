@@ -17,3 +17,4 @@ langchain-core
 langgraph
 langchain-community
 streamlit
+ragas

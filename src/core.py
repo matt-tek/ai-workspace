@@ -4,3 +4,4 @@ from .ingest.loader import load_pdf, split_doc
 from .llm.chat import Chat
 from .llm.llm_factory import LlmFactory
 from .pipeline.rag import Rag
+from .datasets.data import sample_queries, expected_responses_gpt, expected_responses_mistral
