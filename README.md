@@ -4,8 +4,8 @@ test on ai technologies to level up
 ```mermaid
 graph TD;
   subgraph Client
-    A1[Utilisateur (Web-App)]
-    A2[App frontend (Vue.js - React - Streamlit)]
+    A1["Utilisateur (Web-App)"]
+    A2["App frontend (Vue.js - React - Streamlit)"]
   end
 
   subgraph FastAPI Backend
