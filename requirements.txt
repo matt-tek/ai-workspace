@@ -18,3 +18,5 @@ langgraph
 langchain-community
 streamlit
 sqlmodel
+beautifulsoup4
+MechanicalSoup
